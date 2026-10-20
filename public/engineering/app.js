@@ -15,9 +15,9 @@
       'hero.cta.code': 'Read the code',
 
       'stat.tests': 'automated tests',
-      'stat.commands': 'commands exercised over IPC',
-      'stat.e2e': 'E2E scenarios, happy + adverse',
-      'stat.size': 'signed Windows installer',
+      'stat.commands': 'commands over IPC',
+      'stat.e2e': 'internal E2E scenarios, happy + adverse',
+      'stat.size': 'CI build (smoke test)',
 
       'ctx.kicker': '01 — Context',
       'ctx.title': 'Built for shops that cannot go down',
@@ -26,7 +26,7 @@
       'ctx.b1': 'Offline-first: no cloud, no server, no web panel, no telemetry.',
       'ctx.b2': 'Exact money: multi-currency (USD/VES) with zero floating point.',
       'ctx.b3': 'Own the data: local database, verifiable backups, restore is sacred.',
-      'ctx.b4': 'Small and light: a 3.1 MB installer that runs on entry-level hardware.',
+      'ctx.b4': 'Small and light: a 2.97 MB installer that runs on entry-level hardware.',
 
       'arch.kicker': '02 — Architecture',
       'arch.title': 'Three layers, one deliberate boundary',
@@ -45,7 +45,7 @@
       'code.kicker': '03 — The engineering, in code',
       'code.title': 'Six decisions, with the code that proves them',
       'code.lead':
-        'Short excerpts from the private codebase — trimmed for space, not simplified. Each block is the function that does the work the text describes.',
+        'Short excerpts from the codebase — trimmed for space, not simplified. Each block is the function that does the work the text describes.',
 
       'code.1t': 'Money that cannot drift',
       'code.1p':
@@ -73,9 +73,9 @@
 
       'code.5t': 'Contracts enforced by reading the source',
       'code.5p':
-        'A real bug motivated this: the UI called eliminar_consumo with an extra cantidad argument, Tauri silently ignores unknown arguments, and removing one unit deleted the whole line. The fix was structural — a test that parses #[tauri::command] signatures and every invocar() call.',
+        'A real bug motivated this: the UI called eliminar_consumo with an extra cantidad argument, Tauri silently ignores unknown arguments, and removing one unit deleted the whole line. The fix was structural — an audit that parses #[tauri::command] signatures and every invocar() call.',
       'code.5c':
-        'The suite asserts that the shift guard appears in exactly these eight commands — add a ninth without updating the test, and CI fails.',
+        'The audit asserts that the shift guard appears in exactly these eight commands — add a ninth without updating the audit, and CI fails.',
 
       'code.6t': 'A desktop app that heals itself',
       'code.6p':
@@ -88,7 +88,7 @@
       'ver.lead': 'Three layers, from unit tests to a remote harness that clicks the real desktop application.',
       'ver.l1t': 'Unit & contract',
       'ver.l1p':
-        '64 Rust tests in the core plus 5 in the desktop shell, and 96 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov).',
+        '67 Rust tests in the core plus 5 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).',
       'ver.l2t': 'Property-based',
       'ver.l2p':
         'proptest in Rust (property-based integration suites) and fast-check in TypeScript attack the money and inventory invariants with randomized cases.',
@@ -98,7 +98,7 @@
       'ver.h1': 'Linux workstation',
       'ver.h2': 'Windows Server',
       'ver.h3': 'Real Tauri app (WebView2)',
-      'ver.b1': 'Every Tauri command is exercised by the E2E harness: 68 directly (scripts or the app heartbeat), 2 legacy entry points through their wrappers.',
+      'ver.b1': 'The contract audit checks all 73 commands; the internal E2E harness exercises the user flows (cases in docs/e2e.md in the core repository).',
       'ver.b2': 'Forged license rejected: the app refuses to operate (scenario A4).',
       'ver.b3': 'Double-click on CHARGE creates exactly one sale: a replay returns the original ticket.',
       'ver.b4': 'Five concurrent sales keep stock exact; oversell is rejected.',
@@ -115,16 +115,16 @@
       'num.r3': 'Frontend tests',
       'num.r4': 'Rust core line coverage',
       'num.r4v': '95.15% · as a floor, not a proof',
-      'num.r5': 'E2E scenarios',
-      'num.r6': 'E2E scripts (CDP + Playwright)',
+      'num.r5': 'internal E2E scenarios',
+      'num.r6': 'internal E2E scripts (CDP + Playwright)',
       'num.r7': 'Tauri commands over IPC',
-      'num.r7v': '70 · all exercised by E2E',
+      'num.r7v': '73 · all checked by the contract audit',
       'num.r9': 'Persistence trees',
-      'num.r10': 'Signed installer',
-      'num.r11': 'E2E test binary (never shipped)',
+      'num.r10': 'Windows installer (CI build)',
+      'num.r11': 'internal E2E binary (never shipped)',
       'num.r12': 'Source size',
       'num.method':
-        'Method: measured on 2026-09-30 \u2014 cargo test (core and shell), vitest run, cargo llvm-cov -p datiolabs-core, artifact sizes, scenario counting from e2e/ESCENARIOS.md. Only numbers that can be reproduced with a documented command are published.',
+        'Method: counts, LOC and the CI build were measured on 2026-10-20. Coverage (95.15%, measured 2026-09-30) and the internal E2E counts are not re-measured in CI; the E2E harness is internal, and its cases are documented in docs/e2e.md in the core repository. The public code is at github.com/miguelcorderopamphile/datiolabs and github.com/miguelcorderopamphile/datiolabs-frontend.',
 
       'gal.kicker': '06 — Product',
       'gal.title': 'Running today',
@@ -135,9 +135,9 @@
       'gal.c4': 'Open accounts: consumptions, partial payments and balances in both currencies.',
 
       'st.kicker': '07 — Status',
-      'st.title': 'Shipped. Private by design.',
+      'st.title': 'Shipped. Source public.',
       'st.text':
-        'Phases 1\u20134 are implemented, verified and packaged (2026-09-19): product, offline rate, multi-vertical capabilities and the verification stack. The application is actively running in businesses in Venezuela. The source code is private because it is a commercial product.',
+        'Phases 1\u20134 are implemented, verified and packaged (2026-09-19): product, offline rate, multi-vertical capabilities and the verification stack. The application is actively running in businesses in Venezuela. The source code is public (MIT). The commercial product is the business, not the code.',
       'st.p1': 'Product & money',
       'st.p2': 'Offline BCV rate',
       'st.p3': 'Multi-vertical',
@@ -146,7 +146,7 @@
       'hire.kicker': 'Open to work',
       'hire.title': 'Available for Rust roles',
       'hire.text':
-        'Backend, systems or edge — remote, or willing to relocate anywhere if needed. The source is private; the code above is real, and I\u2019m happy to walk through it live.',
+        'Backend, systems or edge — remote, or willing to relocate anywhere if needed. The source is public; the code above is real, and I\u2019m happy to walk through it live.',
       'hire.email': 'Email me',
 
       'foot.tag': 'Engineering case study',
@@ -169,9 +169,9 @@
       'hero.cta.code': 'Leer el código',
 
       'stat.tests': 'pruebas automáticas',
-      'stat.commands': 'comandos ejercidos sobre IPC',
-      'stat.e2e': 'escenarios E2E, felices y adversos',
-      'stat.size': 'instalador firmado de Windows',
+      'stat.commands': 'comandos sobre IPC',
+      'stat.e2e': 'escenarios E2E internos, felices y adversos',
+      'stat.size': 'build de CI (smoke test)',
 
       'ctx.kicker': '01 — Contexto',
       'ctx.title': 'Hecho para comercios que no pueden caerse',
@@ -180,7 +180,7 @@
       'ctx.b1': 'Local-first: sin nube, sin servidor, sin panel web, sin telemetría.',
       'ctx.b2': 'Dinero exacto: multimoneda (USD/Bs) sin punto flotante.',
       'ctx.b3': 'Los datos son del cliente: base local, respaldos verificables, restaurar es sagrado.',
-      'ctx.b4': 'Pequeño y liviano: instalador de 3.1 MB que corre en hardware de entrada.',
+      'ctx.b4': 'Pequeño y liviano: instalador de 2.97 MB que corre en hardware de entrada.',
 
       'arch.kicker': '02 — Arquitectura',
       'arch.title': 'Tres capas, un límite deliberado',
@@ -199,7 +199,7 @@
       'code.kicker': '03 — La ingeniería, en código',
       'code.title': 'Seis decisiones, con el código que las prueba',
       'code.lead':
-        'Fragmentos cortos del código privado — recortados por espacio, no simplificados. Cada bloque es la función que hace el trabajo que describe el texto.',
+        'Fragmentos cortos del código — recortados por espacio, no simplificados. Cada bloque es la función que hace el trabajo que describe el texto.',
 
       'code.1t': 'Dinero que no puede desviarse',
       'code.1p':
@@ -227,9 +227,9 @@
 
       'code.5t': 'Contratos que se hacen cumplir leyendo el código fuente',
       'code.5p':
-        'Lo motivó un bug real: la UI llamaba a eliminar_consumo con un argumento cantidad extra; Tauri ignora silenciosamente los argumentos desconocidos y se borraba la línea completa. La corrección fue estructural — un test que parsea las firmas #[tauri::command] y cada llamada invocar().',
+        'Lo motivó un bug real: la UI llamaba a eliminar_consumo con un argumento cantidad extra; Tauri ignora silenciosamente los argumentos desconocidos y se borraba la línea completa. La corrección fue estructural — una auditoría que parsea las firmas #[tauri::command] y cada llamada invocar().',
       'code.5c':
-        'La suite afirma que la guarda de turno aparece exactamente en estos ocho comandos: si se agrega un noveno sin actualizar el test, CI falla.',
+        'La auditoría afirma que la guarda de turno aparece exactamente en estos ocho comandos: si se agrega un noveno sin actualizar la auditoría, CI falla.',
 
       'code.6t': 'Una app de escritorio que se cura sola',
       'code.6p':
@@ -242,7 +242,7 @@
       'ver.lead': 'Tres capas, desde tests unitarios hasta un arnés remoto que hace clics sobre la aplicación real.',
       'ver.l1t': 'Unitarios y contrato',
       'ver.l1p':
-        '64 tests Rust en el core más 5 en el shell de escritorio, y 96 tests de frontend en 9 suites. El contrato de dinero frontend/backend se hace cumplir con tests de contrato 1:1. Cobertura del core Rust: 95.15% de líneas (92.59% de funciones, 91.13% de regiones, medido con cargo-llvm-cov).',
+        '67 tests Rust en el core más 5 en el shell de escritorio, y 92 tests de frontend en 9 suites. El contrato de dinero frontend/backend se hace cumplir con tests de contrato 1:1. Cobertura del core Rust: 95.15% de líneas (92.59% de funciones, 91.13% de regiones, medido con cargo-llvm-cov el 2026-09-30).',
       'ver.l2t': 'Propiedades',
       'ver.l2p':
         'proptest en Rust (suites de integración con propiedades) y fast-check en TypeScript atacan las invariantes de dinero e inventario con casos aleatorios.',
@@ -252,7 +252,7 @@
       'ver.h1': 'Estación Linux',
       'ver.h2': 'Windows Server',
       'ver.h3': 'App Tauri real (WebView2)',
-      'ver.b1': 'Cada comando Tauri es ejercido por el arnés E2E: 68 directamente (scripts o el latido de la app), 2 comandos heredados a través de sus envoltorios.',
+      'ver.b1': 'La auditoría de contrato verifica los 73 comandos; el arnés E2E interno ejercita los flujos de usuario (casos en docs/e2e.md del repo del core).',
       'ver.b2': 'Licencia forjada rechazada: la app se niega a operar (escenario A4).',
       'ver.b3': 'Doble clic en COBRAR crea exactamente una venta: un reenvío devuelve el ticket original.',
       'ver.b4': 'Cinco ventas concurrentes dejan el stock exacto; el oversell se rechaza.',
@@ -269,16 +269,16 @@
       'num.r3': 'Tests de frontend',
       'num.r4': 'Cobertura de líneas (core Rust)',
       'num.r4v': '95.15% · piso, no prueba',
-      'num.r5': 'Escenarios E2E',
-      'num.r6': 'Scripts E2E (CDP + Playwright)',
+      'num.r5': 'Escenarios E2E internos',
+      'num.r6': 'Scripts E2E internos (CDP + Playwright)',
       'num.r7': 'Comandos Tauri sobre IPC',
-      'num.r7v': '70 · todos ejercidos por E2E',
+      'num.r7v': '73 · todos verificados por el audit de contrato',
       'num.r9': 'Árboles de persistencia',
-      'num.r10': 'Instalador firmado',
-      'num.r11': 'Binario E2E (nunca distribuido)',
+      'num.r10': 'Instalador de Windows (build de CI)',
+      'num.r11': 'Binario E2E interno (nunca distribuido)',
       'num.r12': 'Tamaño del código',
       'num.method':
-        'Método: medido el 2026-09-30 — cargo test (core y shell), vitest run, cargo llvm-cov -p datiolabs-core, tamaños de artefactos y conteo de escenarios desde e2e/ESCENARIOS.md. Solo se publican números reproducibles con un comando documentado.',
+        'Método: conteos, LOC y build de CI medidos el 2026-10-20. La cobertura (95.15%, medida el 2026-09-30) y los conteos E2E internos no se re-miden en CI; el arnés E2E es interno y sus casos están documentados en docs/e2e.md del repo del core. El código público está en github.com/miguelcorderopamphile/datiolabs y github.com/miguelcorderopamphile/datiolabs-frontend.',
 
       'gal.kicker': '06 — Producto',
       'gal.title': 'En operación hoy',
@@ -289,9 +289,9 @@
       'gal.c4': 'Cuentas abiertas: consumos, abonos parciales y saldos en ambas monedas.',
 
       'st.kicker': '07 — Estado',
-      'st.title': 'En producción. Privado por diseño.',
+      'st.title': 'En producción. Código público.',
       'st.text':
-        'Las fases 1–4 están implementadas, verificadas y empaquetadas (2026-09-19): producto, tasa offline, capacidades multi-rubro y el stack de verificación. El programa está corriendo activamente en negocios de Venezuela. El código es privado porque es un producto comercial.',
+        'Las fases 1–4 están implementadas, verificadas y empaquetadas (2026-09-19): producto, tasa offline, capacidades multi-rubro y el stack de verificación. El programa está corriendo activamente en negocios de Venezuela. El código es público (MIT). El producto comercial es el negocio, no el código.',
       'st.p1': 'Producto y dinero',
       'st.p2': 'Tasa BCV offline',
       'st.p3': 'Multi-rubro',
@@ -300,7 +300,7 @@
       'hire.kicker': 'Disponible para trabajar',
       'hire.title': 'Disponible para roles Rust',
       'hire.text':
-        'Backend, sistemas o edge — remoto, o dispuesto a recolocarme en cualquier lugar si es necesario. El código es privado; los fragmentos de arriba son reales y puedo recorrerlos en vivo.',
+        'Backend, sistemas o edge — remoto, o dispuesto a recolocarme en cualquier lugar si es necesario. El código es público; los fragmentos de arriba son reales y puedo recorrerlos en vivo.',
       'hire.email': 'Escríbeme',
 
       'foot.tag': 'Caso de estudio de ingeniería',

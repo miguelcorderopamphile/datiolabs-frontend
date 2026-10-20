@@ -94,20 +94,20 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
-        <div class="text-3xl font-black font-heading tracking-tight">165</div>
+        <div class="text-3xl font-black font-heading tracking-tight">164</div>
         <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.tests">automated tests</div>
       </div>
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
-        <div class="text-3xl font-black font-heading tracking-tight">70/70</div>
-        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.commands">commands exercised over IPC</div>
+        <div class="text-3xl font-black font-heading tracking-tight">73/73</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.commands">commands over IPC</div>
       </div>
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
         <div class="text-3xl font-black font-heading tracking-tight">107</div>
-        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.e2e">E2E scenarios, happy + adverse</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.e2e">internal E2E scenarios, happy + adverse</div>
       </div>
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
-        <div class="text-3xl font-black font-heading tracking-tight">3.1 MB</div>
-        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.size">signed Windows installer</div>
+        <div class="text-3xl font-black font-heading tracking-tight">2.97 MB</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.size">CI build (smoke test)</div>
       </div>
     </div>
   </header>
@@ -127,7 +127,7 @@
         <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b1">Offline-first: no cloud, no server, no web panel, no telemetry.</li>
         <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b2">Exact money: multi-currency (USD/VES) with zero floating point.</li>
         <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b3">Own the data: local database, verifiable backups, restore is sacred.</li>
-        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b4">Small and light: a 3.1 MB installer that runs on entry-level hardware.</li>
+        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b4">Small and light: a 2.97 MB installer that runs on entry-level hardware.</li>
       </ul>
     </section>
 
@@ -166,7 +166,7 @@
       <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="code.kicker">03 — The engineering, in code</div>
       <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-2" data-i18n="code.title">Six decisions, with the code that proves them</h2>
       <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-6" data-i18n="code.lead">
-        Short excerpts from the private codebase — trimmed for space, not simplified. Each block is the
+        Short excerpts from the codebase — trimmed for space, not simplified. Each block is the
         function that does the work the text describes.
       </p>
 
@@ -299,25 +299,24 @@ fn importar_backup(&amp;self, ruta, licencia_esperada) -&gt; Result&lt;(), DbErr
         <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
           <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
             <span class="font-bold" data-i18n="code.5t">Contracts enforced by reading the source</span>
-            <span class="text-slate-400">ui/tests/contract_tauri.test.ts</span>
+            <span class="text-slate-400">scripts/auditar_contrato_tauri.py</span>
           </div>
           <div class="p-5">
             <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.5p">
               A real bug motivated this: the UI called eliminar_consumo with an extra cantidad argument, Tauri silently
-              ignores unknown arguments, and removing one unit deleted the whole line. The fix was structural — a test that
+              ignores unknown arguments, and removing one unit deleted the whole line. The fix was structural — an audit that
               parses #[tauri::command] signatures and every invocar() call.
             </p>
-            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>const esperadas = [
-  'abonar_cuenta', 'abrir_cuenta', 'agregar_consumo', 'cerrar_cuenta',
-  'editar_abono_cuenta', 'eliminar_consumo', 'eliminar_venta', 'registrar_venta',
-];
-expect([...conGuarda].sort()).toEqual(esperadas.sort());
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>GUARDAS_ESPERADAS = {
+    "abonar_cuenta", "abrir_cuenta", "agregar_consumo", "cerrar_cuenta",
+    "editar_abono_cuenta", "eliminar_consumo", "eliminar_venta", "registrar_venta",
+}
 
-// plus: every command registered, no unknown keys sent,
-// no required argument missing, 10 license keys mirrored Rust↔TS</code></pre>
+# plus: every command registered, no unknown keys sent,
+# no required argument missing, 10 license keys mirrored Rust<->TS</code></pre>
             <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.5c">
-              The suite asserts that the shift guard appears in exactly these eight commands — add a ninth without updating
-              the test, and CI fails.
+              The audit asserts that the shift guard appears in exactly these eight commands — add a ninth without updating
+              the audit, and CI fails.
             </p>
           </div>
         </article>
@@ -367,7 +366,7 @@ expect([...conGuarda].sort()).toEqual(esperadas.sort());
             <span class="font-mono text-[11px] font-black px-2 py-0.5 rounded border-2 border-brand-black bg-brand-pink text-white">L1</span>
             <h3 class="font-heading font-black text-base" data-i18n="ver.l1t">Unit &amp; contract</h3>
           </div>
-          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l1p">64 Rust tests in the core plus 5 in the desktop shell, and 96 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov).</p>
+          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l1p">67 Rust tests in the core plus 5 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).</p>
         </div>
 
         <div class="p-5 bg-slate-50 border-2 border-brand-black rounded">
@@ -395,7 +394,7 @@ expect([...conGuarda].sort()).toEqual(esperadas.sort());
       </div>
 
       <ul class="grid sm:grid-cols-2 gap-3 text-sm mb-6">
-        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b1">Every Tauri command is exercised by the E2E harness: 68 directly (scripts or the app heartbeat), 2 legacy entry points through their wrappers.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b1">The contract audit checks all 73 commands; the internal E2E harness exercises the user flows (cases in docs/e2e.md in the core repository).</li>
         <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b2">Forged license rejected: the app refuses to operate (scenario A4).</li>
         <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b3">Double-click on CHARGE creates exactly one sale: a replay returns the original ticket.</li>
         <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b4">Five concurrent sales keep stock exact; oversell is rejected.</li>
@@ -412,24 +411,22 @@ expect([...conGuarda].sort()).toEqual(esperadas.sort());
       <div class="overflow-x-auto">
         <table class="w-full text-sm border-collapse">
           <tbody>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r1">Rust core tests</th><td class="py-2.5 font-mono font-bold">64 <span class="text-emerald-600 text-xs" data-i18n="num.green">all green</span></td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r1">Rust core tests</th><td class="py-2.5 font-mono font-bold">67 <span class="text-emerald-600 text-xs" data-i18n="num.green">all green</span></td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r2">Desktop shell tests (Windows)</th><td class="py-2.5 font-mono font-bold">5</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r3">Frontend tests</th><td class="py-2.5 font-mono font-bold">96 · 9 suites · 7.3 s</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r3">Frontend tests</th><td class="py-2.5 font-mono font-bold">92 · 9 suites</td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r4">Rust core line coverage</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r4v">95.15% · as a floor, not a proof</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r5">E2E scenarios</th><td class="py-2.5 font-mono font-bold">107 · matrices A–N</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r6">E2E scripts (CDP + Playwright)</th><td class="py-2.5 font-mono font-bold">27</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r7">Tauri commands over IPC</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r7v">70 · all exercised by E2E</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r5">internal E2E scenarios</th><td class="py-2.5 font-mono font-bold">107 · internal harness</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r6">internal E2E scripts (CDP + Playwright)</th><td class="py-2.5 font-mono font-bold">27 · internal</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r7">Tauri commands over IPC</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r7v">73 · all checked by the contract audit</td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r9">Persistence trees</th><td class="py-2.5 font-mono font-bold">15</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r10">Signed installer</th><td class="py-2.5 font-mono font-bold">3,256,020 bytes · 3.1 MB</td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r11">E2E test binary (never shipped)</th><td class="py-2.5 font-mono font-bold">10,462,208 bytes · 10.0 MB</td></tr>
-            <tr><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r12">Source size</th><td class="py-2.5 font-mono font-bold">Rust 7,254 LOC · TypeScript 13,932 LOC (+2,134 tests)</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r10">Windows installer (CI build)</th><td class="py-2.5 font-mono font-bold">2,973,442 bytes · 2.97 MB</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r11">internal E2E binary (never shipped)</th><td class="py-2.5 font-mono font-bold">10,462,208 bytes · 10.0 MB</td></tr>
+            <tr><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r12">Source size</th><td class="py-2.5 font-mono font-bold">Rust 8,012 LOC · TypeScript 14,521 LOC (+1,931 tests)</td></tr>
           </tbody>
         </table>
       </div>
       <p class="text-[11px] text-slate-500 font-mono leading-relaxed mt-4" data-i18n="num.method">
-        Method: measured on 2026-09-30 — cargo test (core and shell), vitest run, cargo llvm-cov -p datiolabs-core,
-        artifact sizes, scenario counting from e2e/ESCENARIOS.md. Only numbers that can be reproduced with a
-        documented command are published.
+        Method: counts, LOC and the CI build were measured on 2026-10-20. Coverage (95.15%, measured 2026-09-30) and the internal E2E counts are not re-measured in CI; the E2E harness is internal, and its cases are documented in docs/e2e.md in the core repository. The public code is at github.com/miguelcorderopamphile/datiolabs and github.com/miguelcorderopamphile/datiolabs-frontend.
       </p>
     </section>
 
@@ -461,11 +458,11 @@ expect([...conGuarda].sort()).toEqual(esperadas.sort());
 
     <section id="status" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
       <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="st.kicker">07 — Status</div>
-      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="st.title">Shipped. Private by design.</h2>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="st.title">Shipped. Source public.</h2>
       <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-4" data-i18n="st.text">
         Phases 1–4 are implemented, verified and packaged (2026-09-19): product, offline rate,
         multi-vertical capabilities and the verification stack. The application is actively running
-        in businesses in Venezuela. The source code is private because it is a commercial product.
+        in businesses in Venezuela. The source code is public (MIT). The commercial product is the business, not the code.
       </p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-[11px]">
         <div class="p-3 bg-slate-50 border border-brand-black rounded"><span class="font-black">P1</span> <span class="text-slate-500" data-i18n="st.p1">Product &amp; money</span></div>
@@ -481,7 +478,7 @@ expect([...conGuarda].sort()).toEqual(esperadas.sort());
           <div class="text-[11px] font-black uppercase tracking-widest text-slate-400 font-mono mb-2" data-i18n="hire.kicker">Open to work</div>
           <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-3" data-i18n="hire.title">Available for Rust roles</h2>
           <p class="text-sm text-slate-300 leading-relaxed max-w-2xl" data-i18n="hire.text">
-            Backend, systems or edge — remote, or willing to relocate anywhere if needed. The source is private; the code above is real,
+            Backend, systems or edge — remote, or willing to relocate anywhere if needed. The source is public; the code above is real,
             and I'm happy to walk through it live.
           </p>
         </div>
