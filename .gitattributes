@@ -1,0 +1,7 @@
+# Third-party bundles kept for offline runtime: not our source.
+public/vendor/** linguist-vendored
+public/engineering/** linguist-documentation
+*.woff2 binary
+*.png binary
+*.bmp binary
+*.ico binary

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DatioLabs Engineering — a local-first POS in Rust</title>
+  <meta name="description" content="Engineering case study: DatioLabs Retail, an offline-first Windows point of sale written in Rust with exact decimal money and a real E2E verification harness.">
+  <link rel="canonical" href="https://datiolabs.com/engineering/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://datiolabs.com/engineering/">
+  <meta property="og:title" content="DatioLabs Engineering — a local-first POS in Rust">
+  <meta property="og:description" content="Offline-first Windows POS in Rust: exact decimal money, an append-only inventory ledger, perpetual backups and an E2E harness that clicks the real desktop app.">
+  <meta property="og:image" content="https://datiolabs.com/engineering/assets/caja-carrito.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#F4F3EF">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <script src="/vendor/tailwind.js"></script>
+  <link href="/vendor/fonts.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#F4F3EF',
+              black: '#1E232A',
+              pink: '#2563EB',
+              yellow: '#D97706',
+              cyan: '#0284C7',
+              purple: '#0F172A',
+              gray: '#E5E4DE',
+              text: '#1E232A'
+            }
+          },
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'brutal': '4px 4px 0px 0px rgba(30, 35, 42, 1)',
+            'brutal-sm': '2px 2px 0px 0px rgba(30, 35, 42, 1)',
+            'brutal-hover': '6px 6px 0px 0px rgba(30, 35, 42, 1)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    pre code { display: block; }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col bg-brand-bg text-brand-black font-body selection:bg-brand-pink selection:text-white">
+
+  <nav class="bg-white border-b-2 border-brand-black px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-2xl sm:text-3xl font-black font-heading tracking-tight">DatioLabs<span class="text-brand-pink">.</span></a>
+      <span class="hidden sm:inline-block font-mono text-[11px] font-bold uppercase tracking-widest text-slate-500 border border-brand-black px-2 py-0.5 rounded bg-slate-100">
+        Engineering
+      </span>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button id="lang-toggle" type="button" aria-label="Switch language"
+        class="font-heading font-black text-xs uppercase tracking-wider bg-white text-brand-black border-2 border-brand-black px-3 py-2 rounded shadow-brutal-sm hover:-translate-y-0.5 transition-transform">ES</button>
+      <a href="/demo" class="hidden sm:inline-block font-heading font-black text-xs uppercase tracking-wider bg-white text-brand-black border-2 border-brand-black px-4 py-2 rounded shadow-brutal hover:shadow-brutal-hover hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all" data-i18n="nav.demo">Live demo</a>
+      <a href="#hire" class="font-heading font-black text-xs uppercase tracking-wider bg-brand-pink text-white border-2 border-brand-black px-4 py-2 rounded shadow-brutal hover:shadow-brutal-hover hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all" data-i18n="nav.hire">Hire me</a>
+    </div>
+  </nav>
+
+  <header class="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-12 sm:pt-16 pb-10">
+    <span class="inline-block text-[11px] font-black uppercase tracking-widest px-3 py-1 mb-4 rounded border-2 border-brand-black bg-white shadow-brutal-sm" data-i18n="hero.eyebrow">Engineering case study</span>
+    <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight leading-tight mb-4" data-i18n="hero.title">A local-first point of sale, written in Rust</h1>
+    <p class="text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-3xl mb-4" data-i18n="hero.lead">
+      DatioLabs Retail is a Windows desktop POS for Venezuelan retail: fully offline, exact decimal
+      money, every record on the client's machine. What follows is the engineering: real functions,
+      real invariants, and how each one is verified.
+    </p>
+    <p class="font-mono text-xs font-bold text-brand-black mb-6" data-i18n="hero.by">Built by Miguel Cordero Pamphile · Rust engineer · open to work</p>
+
+    <div class="flex flex-wrap gap-2 mb-8 font-mono text-[11px] font-bold">
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">Rust</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">Tauri</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">Sled</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">rust_decimal</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">TypeScript</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">Playwright · CDP</span>
+      <span class="px-2.5 py-1 bg-white border-2 border-brand-black rounded">GitHub Actions</span>
+    </div>
+
+    <div class="flex flex-wrap gap-4 mb-12">
+      <a href="/demo" class="font-heading font-black text-sm uppercase tracking-wider bg-brand-pink text-white border-2 border-brand-black px-5 py-3 rounded shadow-brutal hover:shadow-brutal-hover hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all" data-i18n="hero.cta.demo">Open the live web demo</a>
+      <a href="#code" class="font-heading font-black text-sm uppercase tracking-wider bg-white text-brand-black border-2 border-brand-black px-5 py-3 rounded shadow-brutal hover:shadow-brutal-hover hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all" data-i18n="hero.cta.code">Read the code</a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
+        <div class="text-3xl font-black font-heading tracking-tight">165</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.tests">automated tests</div>
+      </div>
+      <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
+        <div class="text-3xl font-black font-heading tracking-tight">70/70</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.commands">commands exercised over IPC</div>
+      </div>
+      <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
+        <div class="text-3xl font-black font-heading tracking-tight">107</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.e2e">E2E scenarios, happy + adverse</div>
+      </div>
+      <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
+        <div class="text-3xl font-black font-heading tracking-tight">3.1 MB</div>
+        <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.size">signed Windows installer</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto w-full px-4 sm:px-6 flex-1">
+
+    <section id="context" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="ctx.kicker">01 — Context</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="ctx.title">Built for shops that cannot go down</h2>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-4" data-i18n="ctx.p1">
+        Retail shops in Venezuela run on modest Windows PCs with unreliable connectivity. Prices are
+        anchored in USD while customers pay in bolivars at the official BCV rate, which changes daily.
+        A server, an internet connection or a subscription is not an option: the shop must keep selling
+        when the network is down, and the data must stay on the shop's machine.
+      </p>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b1">Offline-first: no cloud, no server, no web panel, no telemetry.</li>
+        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b2">Exact money: multi-currency (USD/VES) with zero floating point.</li>
+        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b3">Own the data: local database, verifiable backups, restore is sacred.</li>
+        <li class="p-3 bg-slate-50 border border-brand-black rounded font-medium" data-i18n="ctx.b4">Small and light: a 3.1 MB installer that runs on entry-level hardware.</li>
+      </ul>
+    </section>
+
+    <section id="architecture" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="arch.kicker">02 — Architecture</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="arch.title">Three layers, one deliberate boundary</h2>
+      <div class="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3 mb-6">
+        <div class="flex-1 p-4 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="font-heading font-black text-sm" data-i18n="arch.l1t">Frontend SPA</div>
+          <div class="font-mono text-[11px] text-slate-500 mt-1" data-i18n="arch.l1s">TypeScript · Vite · Tailwind</div>
+        </div>
+        <div class="self-center font-black text-slate-500 rotate-90 sm:rotate-0">→</div>
+        <div class="flex-1 p-4 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="font-heading font-black text-sm" data-i18n="arch.l2t">Tauri IPC</div>
+          <div class="font-mono text-[11px] text-slate-500 mt-1" data-i18n="arch.l2s">in-process, no network</div>
+        </div>
+        <div class="self-center font-black text-slate-500 rotate-90 sm:rotate-0">→</div>
+        <div class="flex-1 p-4 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="font-heading font-black text-sm" data-i18n="arch.l3t">datiolabs-core</div>
+          <div class="font-mono text-[11px] text-slate-500 mt-1" data-i18n="arch.l3s">Rust domain engine</div>
+        </div>
+        <div class="self-center font-black text-slate-500 rotate-90 sm:rotate-0">→</div>
+        <div class="flex-1 p-4 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="font-heading font-black text-sm" data-i18n="arch.l4t">Sled</div>
+          <div class="font-mono text-[11px] text-slate-500 mt-1" data-i18n="arch.l4s">embedded DB · SHA-256 signed</div>
+        </div>
+      </div>
+      <ul class="space-y-2 text-sm text-slate-600">
+        <li class="flex gap-2"><span class="font-black text-brand-pink">→</span><span data-i18n="arch.n1">No network services: all communication is Tauri IPC inside the machine.</span></li>
+        <li class="flex gap-2"><span class="font-black text-brand-pink">→</span><span data-i18n="arch.n2">All money and stock math happens in Rust (rust_decimal); the UI mirrors it with integer cents so both sides agree cent by cent.</span></li>
+        <li class="flex gap-2"><span class="font-black text-brand-pink">→</span><span data-i18n="arch.n3">15 persistence trees; backups carry header, trees, metadata and a SHA-256 checksum; a backup from any previous version restores in the current one.</span></li>
+      </ul>
+    </section>
+
+    <section id="code" class="mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="code.kicker">03 — The engineering, in code</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-2" data-i18n="code.title">Six decisions, with the code that proves them</h2>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-6" data-i18n="code.lead">
+        Short excerpts from the private codebase — trimmed for space, not simplified. Each block is the
+        function that does the work the text describes.
+      </p>
+
+      <div class="grid gap-6">
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.1t">Money that cannot drift</span>
+            <span class="text-slate-400">models.rs · lib.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.1p">
+              Every amount in the core is a Decimal, and it travels as text, not as a binary float — sale signatures
+              hash Decimal::to_string(), so a SHA-256 stays reproducible across platforms and versions. A malformed
+              amount never becomes a silent zero: the backend has exactly one parser, and it fails loudly.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>pub fn total_bs(&amp;self) -&gt; Decimal {
+    self.cantidades
+        .iter()
+        .zip(self.precios_usd.iter())
+        .zip(self.tasas_bloqueadas.iter())
+        .fold(Decimal::ZERO, |acc, ((q, p), t)| acc + *q * *p * *t)
+}
+
+fn decimal_de(texto: &amp;str) -&gt; Result&lt;Decimal, UIError&gt; {
+    Decimal::from_str(texto.trim().replace(',', ".").as_str())
+        .map_err(|_| UIError::new("monto invalido", "Se esperaba un numero decimal"))
+}</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.1c">
+              Settlement sums per line with each line's locked rate, so one ticket can mix rates and still reconcile to the
+              cent. The TypeScript side mirrors it with integer cents (Money.toCents, sum, usdToBsCents), and property tests
+              assert exact sums and ≤1-cent reversibility.
+            </p>
+          </div>
+        </article>
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.2t">Stock without database transactions</span>
+            <span class="text-slate-400">db.rs · datiolabs-ui/src/lib.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.2p">
+              The embedded store gives no multi-tree ACID, so inventory doesn't pretend otherwise: one writer at a time
+              (con_ledger on a global Mutex&lt;Ledger&gt;), validate before write, an append-only movements ledger, and flush()
+              as the durability point.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>pub fn aplicar_movimiento(
+    &amp;self,
+    mut movimiento: MovimientoStock,
+    delta_catalogo: impl FnOnce(&amp;str, Decimal),
+) -&gt; Result&lt;MovimientoStock, DbError&gt; {
+    // stock + delta &lt; 0 is rejected here, before anything is written
+}
+
+fn clave_cronologica(fecha_unix: i64, id: &amp;[u8]) -&gt; Vec&lt;u8&gt; {
+    let mut clave = Vec::with_capacity(8 + id.len());
+    clave.extend_from_slice(&amp;(fecha_unix as u64).to_be_bytes());
+    clave.extend_from_slice(id);
+    clave
+}</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.2c">
+              Movements are keyed chronologically, so iter().rev() is recency order without sorting. IDs and names are
+              fixed-size, zero-heap types (struct Sku([u8; 32], u8)), so scans don't allocate.
+            </p>
+          </div>
+        </article>
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.3t">FEFO, packaging and one source of price</span>
+            <span class="text-slate-400">modulos/panaderia.rs · datiolabs-ui/src/lib.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.3p">
+              Perishables consume from lots in expiry order, and the reverse path puts units back into the nearest valid
+              lot. Packaging is not a second inventory: "2 boxes" is converted to base units once, by a single conversion
+              shared by the preview and the charge.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>pub fn descontar_fefo(
+    &amp;mut self,
+    sku: &amp;str,
+    mut cantidad: Decimal,
+    ahora_unix: i64,
+) -&gt; Result&lt;Vec&lt;(String, Decimal)&gt;, ErrorNegocio&gt; {
+    let mut tocados = Vec::new();
+    while cantidad &gt; Decimal::ZERO {
+        // take from the next valid lot, record (lote, cantidad)
+    }
+}
+
+fn resolver_precio_presentacion(catalogo: &amp;Catalogo, idx: usize, modo: &amp;str) -&gt; (Decimal, u32)</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.3c">
+              resolver_precio_presentacion is the only place that decides price and factor, and construir_lineas_venta is
+              the only line factory — shared by previsualizar_cobro and registrar_venta. What the screen confirms is exactly
+              what gets written.
+            </p>
+          </div>
+        </article>
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.4t">A schema you cannot break, backups that outlive versions</span>
+            <span class="text-slate-400">db.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.4p">
+              Records use positional bincode: adding, removing or reordering a field would corrupt every installed client.
+              Persisted structs are therefore frozen, new features go to new trees, and backups are versioned and
+              checksummed end to end.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>pub struct BackupMetadata {
+    pub version: u32,
+    pub timestamp_unix: i64,
+    pub arboles: Vec&lt;String&gt;,
+    pub total_registros: usize,
+    pub checksum_sha256: String,
+}
+
+fn importar_backup(&amp;self, ruta, licencia_esperada) -&gt; Result&lt;(), DbError&gt; {
+    // SHA-256 and the embedded license are verified before anything is written
+}</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.4c">
+              A fixture from the client's installed build is imported in CI and byte-compared against HEAD
+              (compat_backup_cliente.rs). Restoring also clears trees that an older backup didn't have, so no residue survives.
+            </p>
+          </div>
+        </article>
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.5t">Contracts enforced by reading the source</span>
+            <span class="text-slate-400">ui/tests/contract_tauri.test.ts</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.5p">
+              A real bug motivated this: the UI called eliminar_consumo with an extra cantidad argument, Tauri silently
+              ignores unknown arguments, and removing one unit deleted the whole line. The fix was structural — a test that
+              parses #[tauri::command] signatures and every invocar() call.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>const esperadas = [
+  'abonar_cuenta', 'abrir_cuenta', 'agregar_consumo', 'cerrar_cuenta',
+  'editar_abono_cuenta', 'eliminar_consumo', 'eliminar_venta', 'registrar_venta',
+];
+expect([...conGuarda].sort()).toEqual(esperadas.sort());
+
+// plus: every command registered, no unknown keys sent,
+// no required argument missing, 10 license keys mirrored Rust↔TS</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.5c">
+              The suite asserts that the shift guard appears in exactly these eight commands — add a ninth without updating
+              the test, and CI fails.
+            </p>
+          </div>
+        </article>
+
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.6t">A desktop app that heals itself</span>
+            <span class="text-slate-400">datiolabs-ui/src/lib.rs · tasa_bcv.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.6p">
+              The UI sends a heartbeat every 5 seconds; the shell stores it in an AtomicI64, and a watchdog thread reloads
+              the window if it goes quiet for 30 seconds — with a 120-second cooldown so it cannot loop.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>std::thread::spawn(move || loop {
+    std::thread::sleep(Duration::from_secs(10));
+    let visto = ultimo.load(Ordering::Relaxed);
+    if visto &gt; 0 &amp;&amp; ahora - visto &gt; 30 &amp;&amp; ahora - ultimo_reload &gt; 120 {
+        if let Some(ventana) = handle.get_webview_window("main") {
+            let _ = ventana.reload();
+        }
+        ultimo.store(ahora, Ordering::Relaxed);
+        ultimo_reload = ahora;
+    }
+});</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.6c">
+              The E2E suite validates it by freezing the renderer for 45 seconds and asserting the window comes back.
+              The same discipline applies to state: the manual exchange rate is re-checked inside the same write lock that
+              refreshes from BCV, so a stale scrape can never overwrite an operator's decision.
+            </p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section id="verification" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="ver.kicker">04 — Verification</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-3" data-i18n="ver.title">Proof before promises</h2>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-6" data-i18n="ver.lead">
+        Three layers, from unit tests to a remote harness that clicks the real desktop application.
+      </p>
+
+      <div class="grid gap-4 mb-6">
+        <div class="p-5 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="font-mono text-[11px] font-black px-2 py-0.5 rounded border-2 border-brand-black bg-brand-pink text-white">L1</span>
+            <h3 class="font-heading font-black text-base" data-i18n="ver.l1t">Unit &amp; contract</h3>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l1p">64 Rust tests in the core plus 5 in the desktop shell, and 96 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov).</p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="font-mono text-[11px] font-black px-2 py-0.5 rounded border-2 border-brand-black bg-brand-yellow text-white">L2</span>
+            <h3 class="font-heading font-black text-base" data-i18n="ver.l2t">Property-based</h3>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l2p">proptest in Rust (property-based integration suites) and fast-check in TypeScript attack the money and inventory invariants with randomized cases.</p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border-2 border-brand-black rounded">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="font-mono text-[11px] font-black px-2 py-0.5 rounded border-2 border-brand-black bg-brand-black text-white">L3</span>
+            <h3 class="font-heading font-black text-base" data-i18n="ver.l3t">Real E2E over CDP</h3>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="ver.l3p">No mocks: a test build of the Tauri app exposes the Chrome DevTools Protocol and Playwright-core drives real clicks on the real WebView2. The harness runs from a Linux workstation over SSH/SCP against a Windows Server, with an isolated APPDATA and a scheduled interactive task. The test binary and the debug flag never reach the installer — verified in the final artifact.</p>
+          <div class="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+            <span class="px-3 py-1 bg-white border-2 border-brand-black rounded" data-i18n="ver.h1">Linux workstation</span>
+            <span class="font-black text-slate-500">scp/ssh →</span>
+            <span class="px-3 py-1 bg-white border-2 border-brand-black rounded" data-i18n="ver.h2">Windows Server</span>
+            <span class="font-black text-slate-500">CDP :9222 →</span>
+            <span class="px-3 py-1 bg-white border-2 border-brand-black rounded" data-i18n="ver.h3">Real Tauri app (WebView2)</span>
+          </div>
+        </div>
+      </div>
+
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm mb-6">
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b1">Every Tauri command is exercised by the E2E harness: 68 directly (scripts or the app heartbeat), 2 legacy entry points through their wrappers.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b2">Forged license rejected: the app refuses to operate (scenario A4).</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b3">Double-click on CHARGE creates exactly one sale: a replay returns the original ticket.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b4">Five concurrent sales keep stock exact; oversell is rejected.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b5">Midnight crossing (VET) and all 8 shift guards verified.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b6">Unicode/XSS payloads in labels and notes are inert.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b7">Upgrade over an installed version preserves data with 0 hash differences.</li>
+        <li class="p-3 bg-white border border-brand-black rounded" data-i18n="ver.b8">Final installer contains no debug flag and no debug port.</li>
+      </ul>
+    </section>
+
+    <section id="numbers" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="num.kicker">05 — Numbers</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-5" data-i18n="num.title">Every claim has a number</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <tbody>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r1">Rust core tests</th><td class="py-2.5 font-mono font-bold">64 <span class="text-emerald-600 text-xs" data-i18n="num.green">all green</span></td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r2">Desktop shell tests (Windows)</th><td class="py-2.5 font-mono font-bold">5</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r3">Frontend tests</th><td class="py-2.5 font-mono font-bold">96 · 9 suites · 7.3 s</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r4">Rust core line coverage</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r4v">95.15% · as a floor, not a proof</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r5">E2E scenarios</th><td class="py-2.5 font-mono font-bold">107 · matrices A–N</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r6">E2E scripts (CDP + Playwright)</th><td class="py-2.5 font-mono font-bold">27</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r7">Tauri commands over IPC</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r7v">70 · all exercised by E2E</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r9">Persistence trees</th><td class="py-2.5 font-mono font-bold">15</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r10">Signed installer</th><td class="py-2.5 font-mono font-bold">3,256,020 bytes · 3.1 MB</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r11">E2E test binary (never shipped)</th><td class="py-2.5 font-mono font-bold">10,462,208 bytes · 10.0 MB</td></tr>
+            <tr><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r12">Source size</th><td class="py-2.5 font-mono font-bold">Rust 7,254 LOC · TypeScript 13,932 LOC (+2,134 tests)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-[11px] text-slate-500 font-mono leading-relaxed mt-4" data-i18n="num.method">
+        Method: measured on 2026-09-30 — cargo test (core and shell), vitest run, cargo llvm-cov -p datiolabs-core,
+        artifact sizes, scenario counting from e2e/ESCENARIOS.md. Only numbers that can be reproduced with a
+        documented command are published.
+      </p>
+    </section>
+
+    <section id="product" class="mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="gal.kicker">06 — Product</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-2" data-i18n="gal.title">Running today</h2>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-5" data-i18n="gal.lead">
+        Real screenshots of the running application (web demo, mock backend).
+      </p>
+      <div class="grid sm:grid-cols-2 gap-6">
+        <figure>
+          <img src="assets/caja-carrito.png" alt="Checkout screen with catalog, live cart and exact USD/VES totals" loading="lazy" class="w-full border-2 border-brand-black rounded-lg shadow-brutal">
+          <figcaption class="font-mono text-[11px] text-slate-500 mt-3 leading-relaxed" data-i18n="gal.c1">Checkout: catalog, live cart, BCV rate and exact totals in USD and VES.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/panel.png" alt="Owner panel with profitability, shift control and operator management" loading="lazy" class="w-full border-2 border-brand-black rounded-lg shadow-brutal">
+          <figcaption class="font-mono text-[11px] text-slate-500 mt-3 leading-relaxed" data-i18n="gal.c2">Owner panel: profitability by date range, shift control and operator ledger.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/inventario.png" alt="Inventory with stock, lots and packaging" loading="lazy" class="w-full border-2 border-brand-black rounded-lg shadow-brutal">
+          <figcaption class="font-mono text-[11px] text-slate-500 mt-3 leading-relaxed" data-i18n="gal.c3">Inventory: stock, lots and packaging, with FEFO rotation for perishables.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/cuentas.png" alt="Open accounts with consumptions and partial payments" loading="lazy" class="w-full border-2 border-brand-black rounded-lg shadow-brutal">
+          <figcaption class="font-mono text-[11px] text-slate-500 mt-3 leading-relaxed" data-i18n="gal.c4">Open accounts: consumptions, partial payments and balances in both currencies.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="status" class="bg-white border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-8">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="st.kicker">07 — Status</div>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="st.title">Shipped. Private by design.</h2>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-4" data-i18n="st.text">
+        Phases 1–4 are implemented, verified and packaged (2026-09-19): product, offline rate,
+        multi-vertical capabilities and the verification stack. The application is actively running
+        in businesses in Venezuela. The source code is private because it is a commercial product.
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-[11px]">
+        <div class="p-3 bg-slate-50 border border-brand-black rounded"><span class="font-black">P1</span> <span class="text-slate-500" data-i18n="st.p1">Product &amp; money</span></div>
+        <div class="p-3 bg-slate-50 border border-brand-black rounded"><span class="font-black">P2</span> <span class="text-slate-500" data-i18n="st.p2">Offline BCV rate</span></div>
+        <div class="p-3 bg-slate-50 border border-brand-black rounded"><span class="font-black">P3</span> <span class="text-slate-500" data-i18n="st.p3">Multi-vertical</span></div>
+        <div class="p-3 bg-slate-50 border border-brand-black rounded"><span class="font-black">P4</span> <span class="text-slate-500" data-i18n="st.p4">Verification stack</span></div>
+      </div>
+    </section>
+
+    <section id="hire" class="bg-brand-purple border-2 border-brand-black rounded-lg p-6 sm:p-8 shadow-brutal mb-12 text-white">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div>
+          <div class="text-[11px] font-black uppercase tracking-widest text-slate-400 font-mono mb-2" data-i18n="hire.kicker">Open to work</div>
+          <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-3" data-i18n="hire.title">Available for Rust roles</h2>
+          <p class="text-sm text-slate-300 leading-relaxed max-w-2xl" data-i18n="hire.text">
+            Backend, systems or edge — remote, or on-site in Argentina. The source is private; the code above is real,
+            and I'm happy to walk through it live.
+          </p>
+        </div>
+        <div class="flex flex-col gap-3 shrink-0">
+          <a href="mailto:miguelcorderopamphile@gmail.com" class="font-heading font-black text-sm uppercase tracking-wider text-center bg-brand-pink text-white border-2 border-white px-5 py-3 rounded shadow-brutal hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all" data-i18n="hire.email">Email me</a>
+          <a href="https://github.com/miguelcorderopamphile" target="_blank" rel="noopener" class="font-heading font-black text-sm uppercase tracking-wider text-center bg-white text-brand-black border-2 border-white px-5 py-3 rounded shadow-brutal hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all">GitHub</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-white border-t-2 border-brand-black">
+    <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-mono">
+      <span>DatioLabs &middot; 2026</span>
+      <span data-i18n="foot.tag">Engineering case study</span>
+      <div class="flex gap-4">
+        <a href="https://github.com/miguelcorderopamphile" target="_blank" rel="noopener" class="hover:text-brand-pink hover:underline underline-offset-2">GitHub</a>
+        <a href="/" class="hover:text-brand-pink hover:underline underline-offset-2" data-i18n="foot.product">Product site</a>
+        <a href="/demo" class="hover:text-brand-pink hover:underline underline-offset-2" data-i18n="foot.demo">Live demo</a>
+      </div>
+    </div>
+    <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 pb-6 text-xs text-slate-400 font-mono" data-i18n="foot.by">Built by Miguel Cordero Pamphile</div>
+  </footer>
+
+  <script src="app.js" charset="UTF-8"></script>
+</body>
+</html>

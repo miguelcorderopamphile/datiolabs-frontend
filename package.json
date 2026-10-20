@@ -1,0 +1,22 @@
+{
+  "name": "datiolabs-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "fast-check": "^4.9.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.6.1",
+    "wrangler": "^4.86.0"
+  }
+}

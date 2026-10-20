@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  contract:
+    name: Rust contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Rust side is the source of truth; check this frontend against its main.
+      - name: Checkout core
+        uses: actions/checkout@v4
+        with:
+          repository: miguelcorderopamphile/datiolabs
+          path: _core
+
+      - name: Contract audits (TypeScript <-> Rust)
+        run: |
+          python3 _core/scripts/auditar_contrato_campos.py --ui .
+          python3 _core/scripts/auditar_contrato_tauri.py --ui .

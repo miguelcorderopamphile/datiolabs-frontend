@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DatioLabs | Data I/O Labs</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/vendor/tailwind.js"></script>
+    <script src="/vendor/chart.umd.js"></script>
+    <link href="/vendor/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F4F3EF', // Classic bone white
+                            black: '#1E232A', // Slate dark border
+                            pink: '#2563EB', // Cobalt blue accent
+                            yellow: '#D97706', // Classic amber
+                            cyan: '#0284C7', // Slate cyan
+                            purple: '#0F172A', // Deep slate
+                            gray: '#E5E4DE', // Bone divider
+                            text: '#1E232A'
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'brutal': '4px 4px 0px 0px rgba(10, 10, 10, 1)',
+                        'brutal-sm': '2px 2px 0px 0px rgba(10, 10, 10, 1)',
+                        'brutal-hover': '6px 6px 0px 0px rgba(10, 10, 10, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased min-h-screen flex flex-col bg-brand-bg text-brand-black font-body overflow-x-hidden selection:bg-brand-pink selection:text-brand-black">
+    
+    <!-- Navbar Neo-brutalist Ultra-Responsive -->
+    <nav class="bg-white border-b-2 border-brand-black px-3 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-50">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 sm:gap-4">
+                <h1 class="text-2xl sm:text-3xl font-black font-heading tracking-tight shrink-0">DatioLabs<span class="text-brand-pink">.</span></h1>
+                <!-- En desktop se muestra inline junto al logo -->
+                <div id="nav-actions-desktop" class="hidden md:flex items-center gap-2"></div>
+            </div>
+            <!-- Acciones de cabecera: Tasa -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <div id="bcv-indicator" class="flex items-center"></div>
+            </div>
+        </div>
+
+        <!-- En móvil: barra de navegación completa al 100% de ancho -->
+        <div class="md:hidden mt-2 pt-2 border-t border-gray-100">
+            <div id="nav-actions-mobile" class="flex items-center gap-1.5 overflow-x-auto w-full py-0.5 no-scrollbar"></div>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-3 sm:p-6 lg:p-10 max-w-[1600px] mx-auto w-full min-w-0" id="app-root">
+        <!-- Renderizado por MVVM (View) -->
+    </main>
+
+    <div id="modal-root"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

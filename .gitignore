@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+*.local
+.DS_Store
+
+# Installers served by the website are not source
+public/downloads/*.exe
+*.exe
+*.msi

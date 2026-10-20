@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+  <!-- Letra D blanca -->
+  <path d="M18 16 H34 C44 16 48 23 48 32 C48 41 44 48 34 48 H18 Z M26 24 V40 H33 C39 40 40 37 40 32 C40 27 39 24 33 24 Z" fill="#FFFFFF"/>
+  <!-- Punto azul corporativo -->
+  <circle cx="51" cy="45" r="4.5" fill="#2563EB"/>
+</svg>
