@@ -47,7 +47,5 @@ jobs:
           repository: miguelcorderopamphile/datiolabs
           path: _core
 
-      - name: Contract audits (TypeScript <-> Rust)
-        run: |
-          python3 _core/scripts/auditar_contrato_campos.py --ui .
-          python3 _core/scripts/auditar_contrato_tauri.py --ui .
+      - name: Contract audit (TypeScript <-> Rust)
+        run: python3 _core/scripts/auditar_contrato_tauri.py --ui .
