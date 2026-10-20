@@ -146,7 +146,7 @@
       'hire.kicker': 'Open to work',
       'hire.title': 'Available for Rust roles',
       'hire.text':
-        'Backend, systems or edge — remote, or on-site in Argentina. The source is private; the code above is real, and I\u2019m happy to walk through it live.',
+        'Backend, systems or edge — remote, or willing to relocate anywhere if needed. The source is private; the code above is real, and I\u2019m happy to walk through it live.',
       'hire.email': 'Email me',
 
       'foot.tag': 'Engineering case study',
@@ -300,7 +300,7 @@
       'hire.kicker': 'Disponible para trabajar',
       'hire.title': 'Disponible para roles Rust',
       'hire.text':
-        'Backend, sistemas o edge — remoto, o presencial en Argentina. El código es privado; los fragmentos de arriba son reales y puedo recorrerlos en vivo.',
+        'Backend, sistemas o edge — remoto, o dispuesto a recolocarme en cualquier lugar si es necesario. El código es privado; los fragmentos de arriba son reales y puedo recorrerlos en vivo.',
       'hire.email': 'Escríbeme',
 
       'foot.tag': 'Caso de estudio de ingeniería',
