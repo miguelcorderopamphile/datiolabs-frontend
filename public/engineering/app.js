@@ -22,7 +22,7 @@
       'ctx.kicker': '01 — Context',
       'ctx.title': 'Built for shops that cannot go down',
       'ctx.p1':
-        'Retail shops in Venezuela run on modest Windows PCs with unreliable connectivity. Prices are anchored in USD while customers pay in bolivars at the official BCV rate, which changes daily. A server, an internet connection or a subscription is not an option: the shop must keep selling when the network is down, and the data must stay on the shop\u2019s machine.',
+        'Retail shops in Venezuela run on modest Windows PCs with unreliable connectivity. Prices are anchored in USD while customers pay in bolivars (Venezuela's currency) at the official BCV rate (Banco Central de Venezuela, the country's central bank), which changes daily. A server, an internet connection or a subscription is not an option: the shop must keep selling when the network is down, and the data must stay on the shop\u2019s machine.',
       'ctx.b1': 'Offline-first: no cloud, no server, no web panel, no telemetry.',
       'ctx.b2': 'Exact money: multi-currency (USD/VES) with zero floating point.',
       'ctx.b3': 'Own the data: local database, verifiable backups, restore is sacred.',
@@ -43,7 +43,7 @@
       'arch.n3': '15 persistence trees; backups carry header, trees, metadata and a SHA-256 checksum; a backup from any previous version restores in the current one.',
 
       'code.kicker': '03 — The engineering, in code',
-      'code.title': 'Six decisions, with the code that proves them',
+      'code.title': 'Seven decisions, with the code that proves them',
       'code.lead':
         'Short excerpts from the codebase — trimmed for space, not simplified. Each block is the function that does the work the text describes.',
 
@@ -77,6 +77,12 @@
       'code.5c':
         'The audit asserts that the shift guard appears in exactly these eight commands — add a ninth without updating the audit, and CI fails.',
 
+      'code.7t': 'The only external input',
+      'code.7p':
+        'The BCV (Banco Central de Venezuela) publishes the rate as an HTML page, not an API. The shell fetches it hourly with a 30-second timeout, selects the USD box, normalizes the number (1.234,56 and 36,92 both parse), rejects zero and out-of-range values, and writes a signed rate event plus a cache. If the page changes or the network fails, the last rate stays. A manual rate set by the operator wins until they explicitly return to BCV, and the decision is re-checked under the same write lock as the write, so a scrape in flight cannot overwrite it. A missing rate blocks the sale instead of becoming zero.',
+      'code.7c':
+        'It is a small pipeline, not a data platform: one source, one value, hourly. The engineering is in the failure contract: untrusted HTML, validation, fallback, operator override and a signed history. Six tests cover USD vs EUR, number formats, manual stickiness and the cache.',
+
       'code.6t': 'A desktop app that heals itself',
       'code.6p':
         'The UI sends a heartbeat every 5 seconds; the shell stores it in an AtomicI64, and a watchdog thread reloads the window if it goes quiet for 30 seconds — with a 120-second cooldown so it cannot loop.',
@@ -88,7 +94,7 @@
       'ver.lead': 'Three layers, from unit tests to a remote harness that clicks the real desktop application.',
       'ver.l1t': 'Unit & contract',
       'ver.l1p':
-        '67 Rust tests in the core plus 5 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).',
+        '67 Rust tests in the core plus 6 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).',
       'ver.l2t': 'Property-based',
       'ver.l2p':
         'proptest in Rust (property-based integration suites) and fast-check in TypeScript attack the money and inventory invariants with randomized cases.',
@@ -176,7 +182,7 @@
       'ctx.kicker': '01 — Contexto',
       'ctx.title': 'Hecho para comercios que no pueden caerse',
       'ctx.p1':
-        'Los comercios venezolanos operan en PCs Windows modestas y con conectividad poco fiable. Los precios se anclan en USD mientras los clientes pagan en bolívares a la tasa oficial del BCV, que cambia a diario. Un servidor, internet o una suscripción no son opción: la tienda debe seguir vendiendo cuando la red falla y los datos deben quedarse en la máquina del comercio.',
+        'Los comercios venezolanos operan en PCs Windows modestas y con conectividad poco fiable. Los precios se anclan en USD mientras los clientes pagan en bolívares (moneda de Venezuela) a la tasa oficial del BCV (Banco Central de Venezuela), que cambia a diario. Un servidor, internet o una suscripción no son opción: la tienda debe seguir vendiendo cuando la red falla y los datos deben quedarse en la máquina del comercio.',
       'ctx.b1': 'Local-first: sin nube, sin servidor, sin panel web, sin telemetría.',
       'ctx.b2': 'Dinero exacto: multimoneda (USD/Bs) sin punto flotante.',
       'ctx.b3': 'Los datos son del cliente: base local, respaldos verificables, restaurar es sagrado.',
@@ -197,7 +203,7 @@
       'arch.n3': '15 árboles de persistencia; los respaldos llevan header, árboles, metadata y checksum SHA-256; un respaldo de cualquier versión anterior se restaura en la actual.',
 
       'code.kicker': '03 — La ingeniería, en código',
-      'code.title': 'Seis decisiones, con el código que las prueba',
+      'code.title': 'Siete decisiones, con el código que las prueba',
       'code.lead':
         'Fragmentos cortos del código — recortados por espacio, no simplificados. Cada bloque es la función que hace el trabajo que describe el texto.',
 
@@ -231,6 +237,12 @@
       'code.5c':
         'La auditoría afirma que la guarda de turno aparece exactamente en estos ocho comandos: si se agrega un noveno sin actualizar la auditoría, CI falla.',
 
+      'code.7t': 'La única entrada externa',
+      'code.7p':
+        'El BCV (Banco Central de Venezuela) publica la tasa como una página HTML, no como una API. El shell la trae cada hora con timeout de 30 segundos, selecciona el recuadro USD, normaliza el número (1.234,56 y 36,92 se parsean igual), rechaza cero y valores fuera de rango, y graba un evento de tasa firmado más un cache. Si la página cambia o la red falla, queda la última tasa. Una tasa manual del operador gana hasta que vuelva explícitamente a BCV, y la decisión se re-chequea bajo el mismo lock de escritura, así que un scrape en vuelo no la pisa. Sin tasa, la venta se bloquea en vez de convertirse en cero.',
+      'code.7c':
+        'Es un pipeline pequeño, no una plataforma de datos: una fuente, un valor, cada hora. La ingeniería está en el contrato de fallo: HTML no confiable, validación, fallback, override del operador e historial firmado. Seis tests cubren USD vs EUR, formatos numéricos, la persistencia manual y el cache.',
+
       'code.6t': 'Una app de escritorio que se cura sola',
       'code.6p':
         'La UI manda un latido cada 5 segundos; el shell lo guarda en un AtomicI64 y un hilo vigilante recarga la ventana si el latido se calla 30 segundos — con un cooldown de 120 segundos para que no entre en bucle.',
@@ -242,7 +254,7 @@
       'ver.lead': 'Tres capas, desde tests unitarios hasta un arnés remoto que hace clics sobre la aplicación real.',
       'ver.l1t': 'Unitarios y contrato',
       'ver.l1p':
-        '67 tests Rust en el core más 5 en el shell de escritorio, y 92 tests de frontend en 9 suites. El contrato de dinero frontend/backend se hace cumplir con tests de contrato 1:1. Cobertura del core Rust: 95.15% de líneas (92.59% de funciones, 91.13% de regiones, medido con cargo-llvm-cov el 2026-09-30).',
+        '67 tests Rust en el core más 6 en el shell de escritorio, y 92 tests de frontend en 9 suites. El contrato de dinero frontend/backend se hace cumplir con tests de contrato 1:1. Cobertura del core Rust: 95.15% de líneas (92.59% de funciones, 91.13% de regiones, medido con cargo-llvm-cov el 2026-09-30).',
       'ver.l2t': 'Propiedades',
       'ver.l2p':
         'proptest en Rust (suites de integración con propiedades) y fast-check en TypeScript atacan las invariantes de dinero e inventario con casos aleatorios.',

@@ -94,7 +94,7 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
-        <div class="text-3xl font-black font-heading tracking-tight">164</div>
+        <div class="text-3xl font-black font-heading tracking-tight">165</div>
         <div class="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-wider mt-1" data-i18n="stat.tests">automated tests</div>
       </div>
       <div class="bg-white border-2 border-brand-black rounded-lg p-5 shadow-brutal">
@@ -119,7 +119,7 @@
       <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-4" data-i18n="ctx.title">Built for shops that cannot go down</h2>
       <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-4" data-i18n="ctx.p1">
         Retail shops in Venezuela run on modest Windows PCs with unreliable connectivity. Prices are
-        anchored in USD while customers pay in bolivars at the official BCV rate, which changes daily.
+        anchored in USD while customers pay in bolivars (Venezuela's currency) at the official BCV rate (Banco Central de Venezuela, the country's central bank), which changes daily.
         A server, an internet connection or a subscription is not an option: the shop must keep selling
         when the network is down, and the data must stay on the shop's machine.
       </p>
@@ -164,7 +164,7 @@
 
     <section id="code" class="mb-8">
       <div class="text-[11px] font-black uppercase tracking-widest text-slate-500 font-mono mb-2" data-i18n="code.kicker">03 — The engineering, in code</div>
-      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-2" data-i18n="code.title">Six decisions, with the code that proves them</h2>
+      <h2 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-2" data-i18n="code.title">Seven decisions, with the code that proves them</h2>
       <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-6" data-i18n="code.lead">
         Short excerpts from the codebase — trimmed for space, not simplified. Each block is the
         function that does the work the text describes.
@@ -350,6 +350,36 @@ fn importar_backup(&amp;self, ruta, licencia_esperada) -&gt; Result&lt;(), DbErr
           </div>
         </article>
 
+        <article class="bg-white border-2 border-brand-black rounded-lg shadow-brutal overflow-hidden">
+          <div class="flex items-center justify-between gap-3 px-4 py-2 border-b-2 border-brand-black bg-brand-purple text-white font-mono text-[11px]">
+            <span class="font-bold" data-i18n="code.7t">The only external input</span>
+            <span class="text-slate-400">tasa_bcv.rs · db.rs</span>
+          </div>
+          <div class="p-5">
+            <p class="text-sm text-slate-600 leading-relaxed mb-4" data-i18n="code.7p">
+              The BCV (Banco Central de Venezuela) publishes the rate as an HTML page, not an API. The shell
+              fetches it hourly with a 30-second timeout, selects the USD box, normalizes the number
+              (<code>1.234,56</code> and <code>36,92</code> both parse), rejects zero and out-of-range values,
+              and writes a signed rate event plus a cache. If the page changes or the network fails, the last
+              rate stays. A manual rate set by the operator wins until they explicitly return to BCV, and the
+              decision is re-checked under the same write lock as the write, so a scrape in flight cannot
+              overwrite it. A missing rate blocks the sale instead of becoming zero.
+            </p>
+            <pre class="bg-brand-black text-slate-100 font-mono text-[11px] leading-relaxed p-4 rounded border-2 border-brand-black overflow-x-auto"><code>async fn scrapear_bcv(cliente: &amp;reqwest::Client) -&gt; Result&lt;Decimal, UIError&gt; {
+    let html = cliente.get(URL_BCV).send().await?.error_for_status()?.text().await?;
+    extraer_valor_usd(&amp;html).ok_or(UIError { /* keep the last rate */ })
+}
+
+// "1.234,56" and "36,92" both parse; zero and out-of-range are rejected
+fn normalizar_valor_bcv(texto: &amp;str) -&gt; Option&lt;Decimal&gt;</code></pre>
+            <p class="text-sm text-slate-600 leading-relaxed mt-4" data-i18n="code.7c">
+              It is a small pipeline, not a data platform: one source, one value, hourly. The engineering is
+              in the failure contract: untrusted HTML, validation, fallback, operator override and a signed
+              history. Six tests cover USD vs EUR, number formats, manual stickiness and the cache.
+            </p>
+          </div>
+        </article>
+
       </div>
     </section>
 
@@ -366,7 +396,7 @@ fn importar_backup(&amp;self, ruta, licencia_esperada) -&gt; Result&lt;(), DbErr
             <span class="font-mono text-[11px] font-black px-2 py-0.5 rounded border-2 border-brand-black bg-brand-pink text-white">L1</span>
             <h3 class="font-heading font-black text-base" data-i18n="ver.l1t">Unit &amp; contract</h3>
           </div>
-          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l1p">67 Rust tests in the core plus 5 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).</p>
+          <p class="text-sm text-slate-600 leading-relaxed" data-i18n="ver.l1p">67 Rust tests in the core plus 6 in the desktop shell, and 92 frontend tests across 9 suites. The frontend/backend money contract is enforced by 1:1 contract tests. Rust core coverage: 95.15% of lines (92.59% of functions, 91.13% of regions, measured with cargo-llvm-cov on 2026-09-30).</p>
         </div>
 
         <div class="p-5 bg-slate-50 border-2 border-brand-black rounded">
@@ -412,7 +442,7 @@ fn importar_backup(&amp;self, ruta, licencia_esperada) -&gt; Result&lt;(), DbErr
         <table class="w-full text-sm border-collapse">
           <tbody>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r1">Rust core tests</th><td class="py-2.5 font-mono font-bold">67 <span class="text-emerald-600 text-xs" data-i18n="num.green">all green</span></td></tr>
-            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r2">Desktop shell tests (Windows)</th><td class="py-2.5 font-mono font-bold">5</td></tr>
+            <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r2">Desktop shell tests (Windows)</th><td class="py-2.5 font-mono font-bold">6</td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r3">Frontend tests</th><td class="py-2.5 font-mono font-bold">92 · 9 suites</td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r4">Rust core line coverage</th><td class="py-2.5 font-mono font-bold" data-i18n="num.r4v">95.15% · as a floor, not a proof</td></tr>
             <tr class="border-b border-brand-gray"><th class="text-left py-2.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="num.r5">internal E2E scenarios</th><td class="py-2.5 font-mono font-bold">107 · internal harness</td></tr>
