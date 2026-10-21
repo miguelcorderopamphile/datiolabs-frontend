@@ -8,6 +8,9 @@ The Rust core and the desktop shell live in the
 [main repository](https://github.com/miguelcorderopamphile/datiolabs). The shell loads the
 `dist/` build of this app.
 
+The engineering case study lives in `public/engineering/` and is served at
+[datiolabs.com/engineering](https://datiolabs.com/engineering).
+
 ## Development
 
 ```bash
